@@ -1,0 +1,5 @@
+batch_size: 128
+num_epochs: 3
+seq_len: 20
+learning_rate: 0.001
+emb_dim: 300

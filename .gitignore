@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+.ipynb_checkpoints/
+data/
+experiments/
+tf_graph_test.ipynb
