@@ -37,6 +37,7 @@ def create_vocab(pd_series, min_count=0):
 
 def clean(text):
     text = regex.sub(r' ', text).strip()
+    text = re.sub(r' +', ' ', text)
     text = text.lower()
     return text
 
