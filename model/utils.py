@@ -3,9 +3,12 @@ utility functions
 """
 
 import json
+import re
 import yaml
 from sklearn.metrics import f1_score
 import numpy as np
+
+regex = re.compile(r'[^\w\s]')
 
 
 def get_yaml_config(config_path):
@@ -39,3 +42,30 @@ def calculate_metrics(probs, labels):
     metrics['f1'] = f1_score(y_true=labels, y_pred=y_pred)
 
     return metrics
+
+
+def clean(text):
+    text = regex.sub(r' ', text).strip()
+    text = re.sub(r' +', ' ', text)
+    text = text.lower()
+    return text
+
+
+def vectorize(text, seq_len, vocab, emb_matrix):
+    text = clean(text)
+    tokens = text.split()
+
+    vectorized = [0] * seq_len  # <PAD>
+    for i, tok in enumerate(tokens):
+        try:
+            tok_id = vocab[tok]
+        except KeyError:
+            tok_id = 1  # <UNK>
+
+        vectorized[i] = tok_id
+
+    return emb_matrix[vectorized, :]
+
+
+def one_hot(a, num_classes):
+    return np.squeeze(np.eye(num_classes)[a.reshape(-1)]).reshape(-1, num_classes)

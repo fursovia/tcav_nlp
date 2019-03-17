@@ -8,7 +8,7 @@ import re
 from sklearn.model_selection import train_test_split
 import os
 import argparse
-from model.utils import save_vocab_to_txt_file
+from model.utils import save_vocab_to_txt_file, clean
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-dd', '--data_dir', default='data')
@@ -16,8 +16,6 @@ parser.add_argument('-mf', '--min_freq', type=int, default=5)
 parser.add_argument('-s', '--sample', action='store_true')
 
 parser.set_defaults(sample=False)
-
-regex = re.compile(r'[^\w\s]')
 
 
 def update_vocabulary(tokens, counter):
@@ -33,13 +31,6 @@ def create_vocab(pd_series, min_count=0):
 
     vocab_length = len(vocabulary)
     return vocabulary, vocab_length
-
-
-def clean(text):
-    text = regex.sub(r' ', text).strip()
-    text = re.sub(r' +', ' ', text)
-    text = text.lower()
-    return text
 
 
 if __name__ == '__main__':

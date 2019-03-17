@@ -33,12 +33,13 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.join(args.model_dir, 'config.yaml')):
         copyfile(os.path.join('experiments', 'config.yaml'), os.path.join(args.model_dir, 'config.yaml'))
 
+    data = pd.read_csv(os.path.join(args.data_dir, 'train.csv'))
+
     params = get_yaml_config(os.path.join(args.model_dir, 'config.yaml'))
     params['model_dir'] = args.model_dir
     params['data_dir'] = args.data_dir
     params['vocab_path'] = os.path.join(args.data_dir, 'vocab.txt')
     params['vocab_size'] = sum(1 for _ in open(params['vocab_path'], 'r')) + 1
-    data = pd.read_csv(os.path.join(args.data_dir, 'train.csv'))
     params['train_size'] = data.shape[0]
     params['num_classes'] = data['labels'].nunique()
 
@@ -46,6 +47,7 @@ if __name__ == '__main__':
     params['num_epochs'] = args.num_epochs if args.num_epochs is not None else params['num_epochs']
     params['batch_size'] = args.batch_size if args.batch_size is not None else params['batch_size']
     params['learning_rate'] = args.learning_rate if args.learning_rate is not None else params['learning_rate']
+    save_dict_to_yaml(params, os.path.join(args.model_dir, 'config.yaml'))
 
     config = tf.estimator.RunConfig(tf_random_seed=24,
                                     save_checkpoints_steps=int(params['train_size'] / params['batch_size']),
@@ -82,8 +84,8 @@ if __name__ == '__main__':
         eval_logits.append(p['logits'])
         probs.append(p['preds'])
 
-    eval_logits = np.array(eval_logits, np.float64).reshape(-1, 2)
-    probs = np.array(probs, np.float64).reshape(-1, 2)
+    eval_logits = np.array(eval_logits, np.float64).reshape(-1, params['num_classes'])
+    probs = np.array(probs, np.float64).reshape(-1, params['num_classes'])
 
     np.save(os.path.join(args.model_dir, 'eval_logits.npy'), eval_logits)
     np.save(os.path.join(args.model_dir, 'eval_probs.npy'), probs)

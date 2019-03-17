@@ -4,3 +4,6 @@
 data/
 experiments/
 tf_graph_test.ipynb
+__pycache__/
+model/__pycache__/
+tf_graph_test-Copy1.ipynb
