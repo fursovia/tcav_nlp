@@ -74,6 +74,7 @@ class ModelWrapper:
     def __init__(self, model_path, endpoints):
         self.model_path = model_path
         self.endpoints = endpoints
+        self.operations = None
         self.emb_matrix = None
         self.outputs = None
         self.output = None  # logits
@@ -106,6 +107,7 @@ class ModelWrapper:
             saver = tf.train.import_meta_graph(self.path_to_ckpt + '.meta')
             saver.restore(ss, self.path_to_ckpt)
 
+            self.operations = graph.get_operations()
             self.emb_matrix = ss.run(graph.get_tensor_by_name('embeddings/embedding_matrix:0'))
             self.outputs = {key: graph.get_operation_by_name(val).outputs[0] for key, val in self.endpoints.items()}
 

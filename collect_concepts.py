@@ -24,7 +24,7 @@ parser.add_argument('--ngrams', type=int, default=2)
 swem_max_endpoints = dict(
     input_='model/dim_reduction',
     bottleneck='model/bottleneck/BiasAdd',
-    probs='model/Softmax',
+    probs='model/Softmax',  # redundant
     output='model/output_logits/BiasAdd'
 )
 
