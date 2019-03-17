@@ -8,6 +8,7 @@ import tensorflow as tf
 import os
 from model.utils import get_yaml_config, vectorize, one_hot
 import numpy as np
+from tqdm import tqdm
 
 
 def build_model(emb_matrix, features, params):
@@ -15,7 +16,7 @@ def build_model(emb_matrix, features, params):
     embeddings = tf.nn.embedding_lookup(emb_matrix, features['x'], name='emb_matrix_lookup')
 
     out = tf.reduce_max(embeddings, axis=1, name='dim_reduction')
-    out = tf.layers.dense(out, 256, name='bottleneck')
+    out = tf.layers.dense(out, params['hidden_size'], name='bottleneck')
     out = tf.nn.relu(out)
     out = tf.layers.dense(out, params['num_classes'], name='output_logits')
 
@@ -124,18 +125,46 @@ class ModelWrapper:
     def calculate_grad(self, sess, text, labels):
         labels = labels.reshape(-1, 1)
         onehot = one_hot(labels, self.config['num_classes'])
-        inp = self.get_input(text)
 
-        sess.run(tf.global_variables_initializer())
-        grads = sess.run(self.bottleneck_grad, {'one_hot:0': onehot, self.outputs['input_'].name: inp})
+        if isinstance(text, str):
+            inputs = [self.get_input(text)]
+        else:
+            inputs = [self.get_input(t) for t in text]
 
-        return grads
+        gradients = []
+        for i, inp in tqdm(enumerate(inputs)):
+            gradients.append(
+                sess.run(
+                    self.bottleneck_grad,
+                    feed_dict={
+                        'one_hot:0': onehot[i].reshape(-1, self.config['num_classes']),
+                        self.outputs['input_'].name: inp
+                    }
+                )
+            )
+
+        return np.array(gradients).reshape(-1, gradients[-1].shape[1])
 
     def calculate_output(self, sess, text):
-        inp = self.get_input(text)
+        if isinstance(text, str):
+            inputs = [self.get_input(text)]
+        else:
+            inputs = [self.get_input(t) for t in text]
 
-        sess.run(tf.global_variables_initializer())
+        outputs = []
+        for inp in inputs:
+            outputs.append(sess.run(self.output, {self.outputs['input_'].name: inp}))
 
-        logits = sess.run(self.output, {self.outputs['input_'].name: inp})
+        return np.array(outputs).reshape(-1, outputs[-1].shape[1])
 
-        return logits
+    def calculate_bottleneck(self, sess, text):
+        if isinstance(text, str):
+            inputs = [self.get_input(text)]
+        else:
+            inputs = [self.get_input(t) for t in text]
+
+        bottlenecks = []
+        for inp in inputs:
+            bottlenecks.append(sess.run(self.bottleneck, {self.outputs['input_'].name: inp}))
+
+        return np.array(bottlenecks).reshape(-1, bottlenecks[-1].shape[1])

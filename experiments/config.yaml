@@ -3,3 +3,4 @@ num_epochs: 3
 seq_len: 20
 learning_rate: 0.001
 emb_dim: 300
+hidden_size: 256

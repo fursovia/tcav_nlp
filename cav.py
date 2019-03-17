@@ -14,9 +14,9 @@ class CAV:
             y: 0 or 1
         """
 
-        self.lm = LogisticRegression()
+        self.lm = LogisticRegression(solver='lbfgs')
         self.lm.fit(X, y)
 
-        self.cav = self.lm.coef_
+        self.cav = self.lm.coef_.ravel()
 
         return self.cav
