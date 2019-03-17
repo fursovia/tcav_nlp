@@ -122,14 +122,21 @@ class ModelWrapper:
         inp = examples.max(axis=1)
         return inp
 
-    def calculate_grad(self, sess, text, labels):
+    def calculate_grad(self, sess, labels, text=None, bottleneck=None):
         labels = labels.reshape(-1, 1)
         onehot = one_hot(labels, self.config['num_classes'])
 
-        if isinstance(text, str):
-            inputs = [self.get_input(text)]
+        if text is not None:
+            input_name = self.outputs['input_'].name
+            if isinstance(text, str):
+                inputs = [self.get_input(text)]
+            else:
+                inputs = [self.get_input(t) for t in text]
+        elif bottleneck is not None:
+            input_name = self.outputs['bottleneck'].name
+            inputs = bottleneck
         else:
-            inputs = [self.get_input(t) for t in text]
+            raise ValueError('You should pass text or bottleneck')
 
         gradients = []
         for i, inp in tqdm(enumerate(inputs)):
@@ -138,7 +145,7 @@ class ModelWrapper:
                     self.bottleneck_grad,
                     feed_dict={
                         'one_hot:0': onehot[i].reshape(-1, self.config['num_classes']),
-                        self.outputs['input_'].name: inp
+                        input_name: inp
                     }
                 )
             )
