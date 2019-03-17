@@ -7,7 +7,9 @@ import re
 import yaml
 from sklearn.metrics import f1_score
 import numpy as np
+from pymystem3 import Mystem
 
+mystem = Mystem()
 regex = re.compile(r'[^\w\s]')
 
 
@@ -44,10 +46,12 @@ def calculate_metrics(probs, labels):
     return metrics
 
 
-def clean(text):
+def clean(text, lemmatize=True):
     text = regex.sub(r' ', text).strip()
     text = re.sub(r' +', ' ', text)
     text = text.lower()
+    if lemmatize:
+        text = ' '.join([lemma for lemma in mystem.lemmatize(text) if not lemma.isspace()])
     return text
 
 
