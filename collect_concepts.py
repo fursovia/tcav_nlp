@@ -60,7 +60,7 @@ if __name__ == '__main__':
     # CONCEPTS
     print('Getting concepts...')
     train = pd.read_csv(os.path.join(args.data_dir, 'train.csv'))
-    train = train['text'].apply(clean)
+    train['text'] = train['text'].apply(clean)
     labels = train['labels'].values
     data = pd.read_csv(os.path.join('data', 'concept_search.csv'), nrows=50000)
     data['text'] = data['text'].apply(clean)
