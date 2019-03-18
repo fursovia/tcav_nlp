@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
         tcav_scores = {}
         for lab in labels:
-            tcav_score = (dot_prod[labels == lab] > 0).mean()
+            tcav_score = (dot_prod[labels == lab] < 0).mean()
             tcav_scores[lab] = tcav_score
 
         tcav_scores_names = {labs_mapping_inverse[key]: val for key, val in tcav_scores.items()}

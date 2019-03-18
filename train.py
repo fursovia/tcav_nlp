@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-dd', '--data_dir', default='data')
 parser.add_argument('-md', '--model_dir', default='experiments')
+parser.add_argument('-a', '--architecture', default='swem_max')
 parser.add_argument('--seq_len', type=int, default=None)
 parser.add_argument('--num_epochs', type=int, default=None)
 parser.add_argument('--batch_size', type=int, default=None)
@@ -42,6 +43,7 @@ if __name__ == '__main__':
     params['vocab_size'] = sum(1 for _ in open(params['vocab_path'], 'r')) + 1
     params['train_size'] = data.shape[0]
     params['num_classes'] = data['labels'].nunique()
+    params['architecture'] = args.architecture
 
     params['seq_len'] = args.seq_len if args.seq_len is not None else params['seq_len']
     params['num_epochs'] = args.num_epochs if args.num_epochs is not None else params['num_epochs']

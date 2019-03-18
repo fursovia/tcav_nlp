@@ -6,7 +6,7 @@ import numpy as np
 from nltk import ngrams
 from collections import Counter
 import pickle
-from model.utils import clean
+from model.utils import clean, get_yaml_config
 from model.model_fn import ModelWrapper
 import tensorflow as tf
 from cav import CAV
@@ -16,15 +16,20 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-dd', '--data_dir', default='data')
 parser.add_argument('-md', '--model_dir', default='experiments')
-parser.add_argument('-c', '--concept_names', default='путин россия сша')
-parser.add_argument('-a', '--architecture', default='swem_max')
+parser.add_argument('-c', '--concept_names', default='москва ученые концерт')
 parser.add_argument('--ngrams', type=int, default=2)
 
 
 swem_max_endpoints = dict(
-    input_='model/dim_reduction',
+    input_='model/emb_matrix_lookup/Identity',
     bottleneck='model/bottleneck/BiasAdd',
     probs='model/Softmax',  # redundant
+    output='model/output_logits/BiasAdd'
+)
+
+lstm_endpoints = dict(
+    input_='model/emb_matrix_lookup/Identity',
+    bottleneck='model/bottleneck/BiasAdd',
     output='model/output_logits/BiasAdd'
 )
 
@@ -40,8 +45,13 @@ if __name__ == '__main__':
     tf.logging.set_verbosity(tf.logging.INFO)
     args = parser.parse_args()
 
-    if args.architecture == 'swem_max':
+    params = get_yaml_config(os.path.join(args.model_dir, 'config.yaml'))
+    architecture = params['architecture']
+
+    if architecture == 'swem_max':
         endpoints = swem_max_endpoints
+    elif architecture == 'lstm':
+        endpoints = lstm_endpoints
     else:
         raise ValueError('No such architecture')
 
@@ -64,7 +74,7 @@ if __name__ == '__main__':
         concepts[conc]['pos'] = [c for c in ngram_tokens if clean(conc) in c]
         concepts[conc]['neg'] = np.random.choice(ngram_tokens, size=len(concepts[conc]['pos']), replace=False)
 
-    pickle.dump(concepts, open(os.path.join(args.data_dir, 'concepts.pkl'), 'wb'))
+    pickle.dump(concepts, open(os.path.join(args.model_dir, 'concepts.pkl'), 'wb'))
 
     # BOTTLENECKS
     print('Getting bottlenecks...')
@@ -85,7 +95,7 @@ if __name__ == '__main__':
 
         cav_bottlenecks[key] = (X, y)
 
-    pickle.dump(cav_bottlenecks, open(os.path.join(args.data_dir, 'cav_bottlenecks.pkl'), 'wb'))
+    pickle.dump(cav_bottlenecks, open(os.path.join(args.model_dir, 'cav_bottlenecks.pkl'), 'wb'))
 
     # CAVS
     print('Getting CAVs...')
@@ -96,9 +106,9 @@ if __name__ == '__main__':
         v = cav.fit(cav_bottlenecks[key][0], cav_bottlenecks[key][1])  # (X, y)
         cavs[key] = v
 
-    pickle.dump(cavs, open(os.path.join(args.data_dir, 'cavs.pkl'), 'wb'))
+    pickle.dump(cavs, open(os.path.join(args.model_dir, 'cavs.pkl'), 'wb'))
 
     # GRADIENTS
     print('Getting gradients...')
     grads = mw.calculate_grad(sess, labels, data['text'].tolist())
-    pickle.dump(grads, open(os.path.join(args.data_dir, 'grads.pkl'), 'wb'))
+    pickle.dump(grads, open(os.path.join(args.model_dir, 'grads.pkl'), 'wb'))

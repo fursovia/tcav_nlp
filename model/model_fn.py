@@ -15,8 +15,21 @@ def build_model(emb_matrix, features, params):
 
     embeddings = tf.nn.embedding_lookup(emb_matrix, features['x'], name='emb_matrix_lookup')
 
-    out = tf.reduce_max(embeddings, axis=1, name='dim_reduction')
-    out = tf.layers.dense(out, params['hidden_size'], name='bottleneck')
+    if params['architecture'] == 'swem_max':
+        out = tf.reduce_max(embeddings, axis=1, name='dim_reduction')
+        out = tf.layers.dense(out, params['hidden_size'], name='bottleneck')
+
+    elif params['architecture'] == 'lstm':
+        all_states, last_state = tf.nn.dynamic_rnn(
+            cell=tf.nn.rnn_cell.LSTMCell(256, name='lstm_cell_input'),
+            inputs=embeddings,
+            dtype=tf.float64
+        )
+
+        out = tf.layers.dense(last_state[-1], 128, name='bottleneck')
+    else:
+        raise ValueError('No such architecture')
+
     out = tf.nn.relu(out)
     out = tf.layers.dense(out, params['num_classes'], name='output_logits')
 
@@ -71,7 +84,7 @@ def model_fn(features, labels, mode, params):
 
 class ModelWrapper:
 
-    def __init__(self, model_path, endpoints):
+    def __init__(self, model_path, endpoints=None):
         self.model_path = model_path
         self.endpoints = endpoints
         self.operations = None
@@ -97,7 +110,8 @@ class ModelWrapper:
                 c += 1
 
         self.import_graph()
-        self.get_tensors()
+        if self.endpoints is not None:
+            self.get_tensors()
 
     def import_graph(self):
         tf.reset_default_graph()
@@ -109,7 +123,8 @@ class ModelWrapper:
 
             self.operations = graph.get_operations()
             self.emb_matrix = ss.run(graph.get_tensor_by_name('embeddings/embedding_matrix:0'))
-            self.outputs = {key: graph.get_operation_by_name(val).outputs[0] for key, val in self.endpoints.items()}
+            if self.endpoints is not None:
+                self.outputs = {key: graph.get_operation_by_name(val).outputs[0] for key, val in self.endpoints.items()}
 
     def get_tensors(self):
         graph = tf.get_default_graph()
@@ -121,8 +136,7 @@ class ModelWrapper:
     def get_input(self, text):
         examples = vectorize(text, self.config['seq_len'], self.vocab, self.emb_matrix)
         examples = examples.reshape(1, self.config['seq_len'], self.config['emb_dim'])
-        inp = examples.max(axis=1)
-        return inp
+        return examples
 
     def calculate_grad(self, sess, labels, text=None, bottleneck=None):
         labels = labels.reshape(-1, 1)
