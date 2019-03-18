@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-dd', '--data_dir', default='data')
 parser.add_argument('-md', '--model_dir', default='experiments')
+parser.add_argument('--cuda', default='2')
 parser.add_argument('-c', '--concept_names', default='москва ученые концерт')
 parser.add_argument('--ngrams', type=int, default=2)
 
@@ -44,6 +45,7 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     tf.logging.set_verbosity(tf.logging.INFO)
     args = parser.parse_args()
+    os.environ["CUDA_VISIBLE_DEVICES"] = ', '.join([i for i in args['cuda']])
 
     params = get_yaml_config(os.path.join(args.model_dir, 'config.yaml'))
     architecture = params['architecture']

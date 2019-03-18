@@ -5,6 +5,7 @@ import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-dd', '--data_dir', default='data')
+parser.add_argument('-md', '--model_dir', default='experiments')
 
 
 if __name__ == '__main__':
@@ -16,10 +17,10 @@ if __name__ == '__main__':
     labs_mapping = pickle.load(open(os.path.join(args.data_dir, 'labs_mapping.pkl'), 'rb'))
     labs_mapping_inverse = {val: key for key, val in labs_mapping.items()}
 
-    cav_bottlenecks = pickle.load(open(os.path.join(args.data_dir, 'cav_bottlenecks.pkl'), 'rb'))
-    concepts = pickle.load(open(os.path.join(args.data_dir, 'concepts.pkl'), 'rb'))
-    cavs = pickle.load(open(os.path.join(args.data_dir, 'cavs.pkl'), 'rb'))
-    grads = pickle.load(open(os.path.join(args.data_dir, 'grads.pkl'), 'rb'))
+    cav_bottlenecks = pickle.load(open(os.path.join(args.model_dir, 'cav_bottlenecks.pkl'), 'rb'))
+    concepts = pickle.load(open(os.path.join(args.model_dir, 'concepts.pkl'), 'rb'))
+    cavs = pickle.load(open(os.path.join(args.model_dir, 'cavs.pkl'), 'rb'))
+    grads = pickle.load(open(os.path.join(args.model_dir, 'grads.pkl'), 'rb'))
 
     scores = dict()
     for key, val in concepts.items():
@@ -36,4 +37,4 @@ if __name__ == '__main__':
 
         scores[key] = tcav_scores_names
 
-    pickle.dump(scores, open(os.path.join(args.data_dir, 'scores.pkl'), 'wb'))
+    pickle.dump(scores, open(os.path.join(args.model_dir, 'scores.pkl'), 'wb'))

@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-dd', '--data_dir', default='data')
 parser.add_argument('-md', '--model_dir', default='experiments')
 parser.add_argument('-a', '--architecture', default='swem_max')
+parser.add_argument('--cuda', default='2')
 parser.add_argument('--seq_len', type=int, default=None)
 parser.add_argument('--num_epochs', type=int, default=None)
 parser.add_argument('--batch_size', type=int, default=None)
@@ -27,6 +28,7 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     tf.logging.set_verbosity(tf.logging.INFO)
     args = parser.parse_args()
+    os.environ["CUDA_VISIBLE_DEVICES"] = ', '.join([i for i in args['cuda']])
 
     if not os.path.exists(args.model_dir):
         os.makedirs(args.model_dir)
