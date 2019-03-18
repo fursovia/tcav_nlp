@@ -28,7 +28,7 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     tf.logging.set_verbosity(tf.logging.INFO)
     args = parser.parse_args()
-    os.environ["CUDA_VISIBLE_DEVICES"] = ', '.join([i for i in args['cuda']])
+    os.environ["CUDA_VISIBLE_DEVICES"] = ', '.join([i for i in args.cuda])
 
     if not os.path.exists(args.model_dir):
         os.makedirs(args.model_dir)

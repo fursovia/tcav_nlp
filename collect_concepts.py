@@ -45,7 +45,7 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     tf.logging.set_verbosity(tf.logging.INFO)
     args = parser.parse_args()
-    os.environ["CUDA_VISIBLE_DEVICES"] = ', '.join([i for i in args['cuda']])
+    os.environ["CUDA_VISIBLE_DEVICES"] = ', '.join([i for i in args.cuda])
 
     params = get_yaml_config(os.path.join(args.model_dir, 'config.yaml'))
     architecture = params['architecture']
