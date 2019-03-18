@@ -14,7 +14,7 @@ if __name__ == '__main__':
     data = pd.read_csv(os.path.join(args.data_dir, 'train.csv'))
     labels = data['labels'].values
 
-    labs_mapping = pickle.load(open(os.path.join(args.data_dir, 'labs_mapping.pkl'), 'rb'))
+    labs_mapping = pickle.load(open(os.path.join('data', 'labs_mapping.pkl'), 'rb'))
     labs_mapping_inverse = {val: key for key, val in labs_mapping.items()}
 
     cav_bottlenecks = pickle.load(open(os.path.join(args.model_dir, 'cav_bottlenecks.pkl'), 'rb'))
