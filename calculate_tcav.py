@@ -11,7 +11,7 @@ parser.add_argument('-md', '--model_dir', default='experiments')
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    data = pd.read_csv(os.path.join(args.data_dir, 'concept_search.csv'), nrows=50000)
+    data = pd.read_csv(os.path.join(args.data_dir, 'train.csv'))
     labels = data['labels'].values
 
     labs_mapping = pickle.load(open(os.path.join(args.data_dir, 'labs_mapping.pkl'), 'rb'))

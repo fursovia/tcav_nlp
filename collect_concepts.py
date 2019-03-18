@@ -59,9 +59,11 @@ if __name__ == '__main__':
 
     # CONCEPTS
     print('Getting concepts...')
-    data = pd.read_csv(os.path.join(args.data_dir, 'concept_search.csv'), nrows=50000)
+    train = pd.read_csv(os.path.join(args.data_dir, 'train.csv'))
+    train = train['text'].apply(clean)
+    labels = train['labels'].values
+    data = pd.read_csv(os.path.join('data', 'concept_search.csv'), nrows=50000)
     data['text'] = data['text'].apply(clean)
-    labels = data['labels'].values
 
     counter = Counter()
     for t in data['text']:
@@ -112,5 +114,5 @@ if __name__ == '__main__':
 
     # GRADIENTS
     print('Getting gradients...')
-    grads = mw.calculate_grad(sess, labels, data['text'].tolist())
+    grads = mw.calculate_grad(sess, labels, train['text'].tolist())
     pickle.dump(grads, open(os.path.join(args.model_dir, 'grads.pkl'), 'wb'))

@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
     # CALCULATE METRICS
 
-    labels = pd.read_csv(os.path.join(args.data_dir, 'eval.csv'))['target'].values
+    labels = pd.read_csv(os.path.join(args.data_dir, 'eval.csv'))['labels'].values
     metrics = calculate_metrics(probs, labels)
 
     for key, val in metrics.items():
